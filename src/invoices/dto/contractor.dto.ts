@@ -1,5 +1,15 @@
+import {
+  ContractorAddressValidator,
+  ContractorCompanyValidator,
+  ContractorNameValidator,
+  ContractorSurnameValidator,
+  ContractorTaxIdValidator,
+} from '../helpers/invoiceValidation.decorator';
+
 export class ContractorDto {
-  name: string;
-  surname: string;
-  company_name: string;
+  @ContractorNameValidator() name: string;
+  @ContractorSurnameValidator() surname: string;
+  @ContractorCompanyValidator() companyName: string;
+  @ContractorTaxIdValidator() nip: string;
+  @ContractorAddressValidator() address: string;
 }

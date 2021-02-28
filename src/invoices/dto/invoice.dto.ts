@@ -1,13 +1,24 @@
 import { ContractorDto } from './contractor.dto';
-import { incomeDto } from './income.dto';
-import { expensesDto } from './expenses.dto';
+import { IncomeDto } from './income.dto';
+import { ExpensesDto } from './expenses.dto';
+import {
+  IdValidator,
+  PositionValidator,
+  DateOfEventValidator,
+  DescriptionValidator,
+  RegistryValidator,
+  ContractorValidator,
+  IncomeValidator,
+  ExpensesValidator,
+} from '../helpers/invoiceValidation.decorator';
 
 export class InvoiceDto {
-  position: number;
-  date_of_event: string;
-  registry: string;
-  description: string;
-  contractor: ContractorDto;
-  income: incomeDto;
-  expenses: expensesDto;
+  @IdValidator() id: string;
+  @PositionValidator() position: number;
+  @DateOfEventValidator() dateOfEvent: string;
+  @RegistryValidator() registry: string;
+  @DescriptionValidator() description: string;
+  @ContractorValidator() contractor: ContractorDto;
+  @IncomeValidator() income: IncomeDto;
+  @ExpensesValidator() expenses: ExpensesDto;
 }

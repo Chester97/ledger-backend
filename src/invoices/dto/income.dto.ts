@@ -1,4 +1,9 @@
-export class incomeDto {
-  sold_goods: number;
-  total_goods: number;
+import {
+  IncomeSoldValidator,
+  IncomeTotalValidator,
+} from '../helpers/invoiceValidation.decorator';
+
+export class IncomeDto {
+  @IncomeSoldValidator() soldGoods: number;
+  @IncomeTotalValidator() totalGoods: number;
 }

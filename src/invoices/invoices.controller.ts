@@ -10,9 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { nanoid } from 'nanoid';
 import { BodyRequestGuard } from '../guards/body.guard';
 import { InvoicesService } from './invoices.service';
 import { InvoiceDto } from './dto/invoice.dto';
+
+type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
 @Controller('invoices')
 export class InvoicesController {
@@ -22,14 +25,16 @@ export class InvoicesController {
   @Get()
   invoices(@Res() res: Response): Response {
     // Here I should return all invoices with summary which is sum of my company collected invoices and sold invoices
-    return res.send('Here You have all saved invoices');
+    const invoices = this.invoicesService.getAllInvoices();
+    return res.json(invoices);
   }
 
   /* GET SPECIFIC INVOICE */
   @Get('/:id')
   invoice(@Res() res: Response, @Param() param): Response {
     const { id } = param;
-    return res.send(`Here You have an invoice by ${id} id.`);
+    const invoice = this.invoicesService.getSpecificInvoice(id);
+    return res.json(invoice);
   }
 
   /* DELETE SPECIFIC BY ID(RECORD ID NOT COMPANY ID) INVOICE */
@@ -48,9 +53,9 @@ export class InvoicesController {
 
   /* ADD ONE OR MANY INVOICES */
   @Post('/add')
-  @UseGuards(BodyRequestGuard)
-  addInvoice(@Res() res: Response, @Body() body: InvoiceDto) {
-    return res.send('Success, record has been added');
+  addInvoice(@Res() res: Response, @Body() body: Omit<InvoiceDto, 'id'>) {
+    const invoice = this.invoicesService.addInvoice(body);
+    return res.json(invoice);
   }
 
   /* FILTER INVOICES BY PARAMS IN BODY */
@@ -62,13 +67,13 @@ export class InvoicesController {
 
   /* UPDATE SPECIFIC INVOICE */
   @Patch('/update/:id')
-  @UseGuards(BodyRequestGuard)
   updateInvoice(
     @Res() res: Response,
-    @Body() body: InvoiceDto,
-    @Param() param,
+    @Body() body: AtLeast<InvoiceDto, 'id'>,
+    @Param() param: Pick<InvoiceDto, 'id'>,
   ) {
     const { id } = param;
+    console.log(nanoid());
     return res.send(
       `Record with ${id} id has been updated by: ${JSON.stringify(body)}`,
     );
