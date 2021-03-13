@@ -7,7 +7,13 @@ import {
   IsString,
   Length,
   ValidateNested,
+  IsNumber,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ContractorDto } from '../dto/contractor.dto';
+import { InvoiceDto } from '../dto/invoice.dto';
+import { IncomeDto } from '../dto/income.dto';
+import { ExpensesDto } from '../dto/expenses.dto';
 
 export function IdValidator() {
   return applyDecorators(
@@ -56,14 +62,16 @@ export function DescriptionValidator() {
 export function ContractorValidator() {
   return applyDecorators(
     IsDefined({ message: 'Contractor fields are required!' }),
-    ValidateNested({ message: 'Contractor fields are required!' }),
+    ValidateNested({ each: true, message: 'Contractor fields are required!' }),
+    Type(() => ContractorDto),
   );
 }
 
 export function IncomeValidator() {
   return applyDecorators(
+    Type(() => IncomeDto),
     IsDefined({ message: 'Income fields are required!' }),
-    ValidateNested({ message: 'Income fields are required!' }),
+    ValidateNested({ each: true, message: 'Income fields are required!' }),
   );
 }
 

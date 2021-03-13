@@ -8,12 +8,14 @@ import {
   Body,
   Param,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { nanoid } from 'nanoid';
 import { BodyRequestGuard } from '../guards/body.guard';
 import { InvoicesService } from './invoices.service';
-import { InvoiceDto } from './dto/invoice.dto';
+import { AddInvoiceDto, InvoiceDto } from './dto/invoice.dto';
 
 type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
@@ -53,9 +55,22 @@ export class InvoicesController {
 
   /* ADD ONE OR MANY INVOICES */
   @Post('/add')
-  addInvoice(@Res() res: Response, @Body() body: Omit<InvoiceDto, 'id'>) {
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      disableErrorMessages: false,
+      always: true,
+      stopAtFirstError: true,
+      validateCustomDecorators: true,
+    }),
+  )
+  addInvoice(@Res() res: Response, @Body() body: AddInvoiceDto) {
     const invoice = this.invoicesService.addInvoice(body);
-    return res.json(invoice);
+    return invoice
+      ? res.json(invoice)
+      : res
+          .json({ message: 'Invoice already exist', status: 'failed' })
+          .status(404);
   }
 
   /* FILTER INVOICES BY PARAMS IN BODY */

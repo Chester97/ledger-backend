@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InvoiceDto } from './dto/invoice.dto';
+import { AddInvoiceDto, InvoiceDto } from './dto/invoice.dto';
 import { nanoid } from 'nanoid';
 import { isEmpty } from 'rambda';
 
@@ -9,16 +9,16 @@ const firstItem: InvoiceDto = {
   dateOfEvent: '2021-02-23',
   registry: 'abc1234678',
   description: 'kulalalal',
+  income: {
+    soldGoods: 232323,
+    totalGoods: 3232323,
+  },
   contractor: {
     name: 'Kamil',
     surname: 'Kowalczuk',
     companyName: 'KKF Company',
     nip: '54333222343',
     address: 'Pietkiewicza 4D/29',
-  },
-  income: {
-    soldGoods: 232323,
-    totalGoods: 3232323,
   },
   expenses: {
     other: 323,
@@ -30,15 +30,13 @@ const firstItem: InvoiceDto = {
 export class InvoicesService {
   private readonly invoiceDtos: InvoiceDto[] = [firstItem];
 
-  addInvoice(invoice: Omit<InvoiceDto, 'id'>): any {
+  addInvoice(invoice: AddInvoiceDto): any {
     const newInvoiceRecord: InvoiceDto = { id: nanoid(), ...invoice };
     const { registry } = newInvoiceRecord;
     if (this.isInvoiceExistByRegistry(registry)) {
-      // co zwracać jeśli się nie udało dodać?
       return false;
     }
     this.invoiceDtos.push(newInvoiceRecord);
-    console.log(this.invoiceDtos);
     return newInvoiceRecord;
   }
 

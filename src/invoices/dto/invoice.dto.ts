@@ -11,6 +11,7 @@ import {
   IncomeValidator,
   ExpensesValidator,
 } from '../helpers/invoiceValidation.decorator';
+import { OmitType } from '@nestjs/mapped-types';
 
 export class InvoiceDto {
   @IdValidator() id: string;
@@ -22,3 +23,5 @@ export class InvoiceDto {
   @IncomeValidator() income: IncomeDto;
   @ExpensesValidator() expenses: ExpensesDto;
 }
+
+export class AddInvoiceDto extends OmitType(InvoiceDto, ['id'] as const) {}
