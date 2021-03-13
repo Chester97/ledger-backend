@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InvoiceDto } from './dto/invoice.dto';
+import { errorResponseObject } from './helpers/errorResponseObject';
 import { nanoid } from 'nanoid';
 import { isEmpty } from 'rambda';
 
@@ -28,17 +29,16 @@ const firstItem: InvoiceDto = {
 
 @Injectable()
 export class InvoicesService {
-  private readonly invoiceDtos: InvoiceDto[] = [firstItem];
+  private invoiceDtos: InvoiceDto[] = [firstItem];
 
   addInvoice(invoice: Omit<InvoiceDto, 'id'>): any {
     const newInvoiceRecord: InvoiceDto = { id: nanoid(), ...invoice };
     const { registry } = newInvoiceRecord;
     if (this.isInvoiceExistByRegistry(registry)) {
-      // co zwracać jeśli się nie udało dodać?
-      return false;
+      return errorResponseObject('This invoice is already exist in DB!');
     }
+    console.log('DODAJE FAKTURE');
     this.invoiceDtos.push(newInvoiceRecord);
-    console.log(this.invoiceDtos);
     return newInvoiceRecord;
   }
 
@@ -65,5 +65,10 @@ export class InvoicesService {
 
   removeSpecificInvoice(invoiceID: string) {
     const invoices = this.invoiceDtos.filter(({ id }) => invoiceID !== id);
+    if (isEmpty(invoices)) {
+      this.invoiceDtos = invoices;
+      return true;
+    }
+    return false;
   }
 }

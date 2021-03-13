@@ -1,15 +1,47 @@
 import { applyDecorators } from '@nestjs/common';
 import {
+  Validate,
   IsInt,
   Min,
   IsDefined,
-  IsDate,
+  IsNotEmpty,
+  IsNotEmptyObject,
+  IsDateString,
   IsString,
   Length,
   ValidateNested,
+  registerDecorator,
+  ValidationOptions,
+  ValidationArguments,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ContractorDto } from '../dto/contractor.dto';
+import { ExpensesDto } from '../dto/expenses.dto';
+import { IncomeDto } from '../dto/income.dto';
+import { IsOnlyDate } from './isOnlyDateValidator';
+import { isEmpty } from 'rambda';
+
+export function customNestedObject(validationOptions?: ValidationOptions) {
+  return (object: any, propertyName: string) => {
+    registerDecorator({
+      name: 'IsNestedObject',
+      target: object.constructor,
+      propertyName,
+      constraints: [],
+      options: validationOptions,
+      validator: {
+        validate(value: any, args: ValidationArguments) {
+          console.log(args);
+          if (isEmpty(value)) return false;
+          return true;
+        },
+      },
+    });
+  };
+}
 
 export function IdValidator() {
+  console.log('wbijam ID');
   return applyDecorators(
     IsDefined({ message: 'ID of an inovice is required!' }),
     IsString({ message: 'ID must be a string!' }),
@@ -18,8 +50,10 @@ export function IdValidator() {
 }
 
 export function PositionValidator() {
+  console.log('wbijam');
   return applyDecorators(
     IsDefined({ message: 'Position of invoice is required!' }),
+    IsNotEmpty(),
     IsInt({ message: 'Position of invoice must be a number' }),
     Min(1, { message: 'Position of invoice must be greater than 0' }),
   );
@@ -28,7 +62,7 @@ export function PositionValidator() {
 export function DateOfEventValidator() {
   return applyDecorators(
     IsDefined({ message: 'Date of invoice event is required!' }),
-    // IsDate({ message: 'Date field must be defined and valid!' }),
+    IsOnlyDate(),
   );
 }
 
@@ -55,22 +89,29 @@ export function DescriptionValidator() {
 
 export function ContractorValidator() {
   return applyDecorators(
+    Type(() => ContractorDto),
     IsDefined({ message: 'Contractor fields are required!' }),
-    ValidateNested({ message: 'Contractor fields are required!' }),
+    ValidateNested({ each: true, message: 'Contractor fields are required!' }),
   );
 }
 
+// export function IncomeValidator() {
+//   return applyDecorators(
+//     IsDefined({ message: 'Income fields are required!' }),
+//     IsNotEmptyObject(),
+//     ValidateNested({ each: true, message: 'Income fields are required!' }),
+//     Type(() => IncomeDto),
+//   );
+// }
+
 export function IncomeValidator() {
-  return applyDecorators(
-    IsDefined({ message: 'Income fields are required!' }),
-    ValidateNested({ message: 'Income fields are required!' }),
-  );
+  return applyDecorators(IsDefined(), IsNotEmptyObject(), customNestedObject());
 }
 
 export function ExpensesValidator() {
   return applyDecorators(
     IsDefined({ message: 'Expenses fields are required!' }),
-    ValidateNested({ message: 'Expenses fields are required!' }),
+    ValidateNested({ each: true, message: 'Expenses fields are required!' }),
   );
 }
 
@@ -122,6 +163,7 @@ export function ContractorTaxIdValidator() {
 export function ContractorAddressValidator() {
   // poprawić
   return applyDecorators(
+    IsNotEmpty(),
     IsDefined({ message: 'Contractor address is required!' }),
     IsString({ message: 'Contractor address must be a string!' }),
     Length(10, 50, {
