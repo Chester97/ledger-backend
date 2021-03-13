@@ -1,3 +1,4 @@
+import { OmitType } from '@nestjs/mapped-types';
 import { ContractorDto } from './contractor.dto';
 import { IncomeDto } from './income.dto';
 import { ExpensesDto } from './expenses.dto';
@@ -19,6 +20,8 @@ export class InvoiceDto {
   @RegistryValidator() registry: string;
   @DescriptionValidator() description: string;
   @ContractorValidator() contractor: ContractorDto;
-  @IncomeValidator() income: IncomeDto;
+  @IncomeValidator() income!: IncomeDto;
   @ExpensesValidator() expenses: ExpensesDto;
 }
+
+export class OmitIdInvoiceDto extends OmitType(InvoiceDto, ['id'] as const) {}

@@ -8,14 +8,17 @@ import {
   Body,
   Param,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { nanoid } from 'nanoid';
 import { BodyRequestGuard } from '../guards/body.guard';
 import { InvoicesService } from './invoices.service';
-import { InvoiceDto } from './dto/invoice.dto';
+import { InvoiceDto, OmitIdInvoiceDto } from './dto/invoice.dto';
 
 type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
+type XYZ = Exclude<InvoiceDto, 'id'>;
 
 @Controller('invoices')
 export class InvoicesController {
@@ -41,7 +44,8 @@ export class InvoicesController {
   @Delete('/:id')
   removeInvoice(@Res() res: Response, @Param() param) {
     const { id } = param;
-    return res.send(`Record with ${id} id has been deleted`);
+    const deletedInvoice = this.invoicesService.removeSpecificInvoice(id);
+    return deletedInvoice ? res.status(204).json({}) : res.status(409).json({});
   }
 
   /* DELETE SPECIFIC BY DATE INVOICE */
@@ -53,7 +57,23 @@ export class InvoicesController {
 
   /* ADD ONE OR MANY INVOICES */
   @Post('/add')
-  addInvoice(@Res() res: Response, @Body() body: Omit<InvoiceDto, 'id'>) {
+  addInvoice(
+    @Res() res: Response,
+    @Body(
+      new ValidationPipe({
+        disableErrorMessages: false,
+        always: true,
+        stopAtFirstError: true,
+        validateCustomDecorators: true,
+        skipMissingProperties: false,
+        transform: true,
+        transformOptions: {
+          enableImplicitConversion: true,
+        },
+      }),
+    )
+    body: OmitIdInvoiceDto,
+  ) {
     const invoice = this.invoicesService.addInvoice(body);
     return res.json(invoice);
   }
