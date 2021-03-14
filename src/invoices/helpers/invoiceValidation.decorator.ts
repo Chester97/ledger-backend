@@ -7,13 +7,18 @@ import {
   IsString,
   Length,
   ValidateNested,
-  IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ContractorDto } from '../dto/contractor.dto';
-import { InvoiceDto } from '../dto/invoice.dto';
-import { IncomeDto } from '../dto/income.dto';
-import { ExpensesDto } from '../dto/expenses.dto';
+import {
+  IncomeNested,
+  IncomeProperties,
+} from './IncomeCustomValidator.decorator';
+import {
+  ExpensesNested,
+  ExpensesProperties,
+} from './ExpensesCustomValidator.decorator';
+import { IsOnlyDate } from './DateCustomValidator.decorator';
 
 export function IdValidator() {
   return applyDecorators(
@@ -34,7 +39,7 @@ export function PositionValidator() {
 export function DateOfEventValidator() {
   return applyDecorators(
     IsDefined({ message: 'Date of invoice event is required!' }),
-    // IsDate({ message: 'Date field must be defined and valid!' }),
+    IsOnlyDate(),
   );
 }
 
@@ -69,16 +74,19 @@ export function ContractorValidator() {
 
 export function IncomeValidator() {
   return applyDecorators(
-    Type(() => IncomeDto),
     IsDefined({ message: 'Income fields are required!' }),
-    ValidateNested({ each: true, message: 'Income fields are required!' }),
+    IncomeNested({ message: 'Income fields are empty!' }),
+    IncomeProperties({ message: 'Missing fields or wrong data in Income!' }),
   );
 }
 
 export function ExpensesValidator() {
   return applyDecorators(
     IsDefined({ message: 'Expenses fields are required!' }),
-    ValidateNested({ message: 'Expenses fields are required!' }),
+    ExpensesNested({ message: 'Expenses fields are empty!' }),
+    ExpensesProperties({
+      message: 'Missing fields or wrong data in Expenses!',
+    }),
   );
 }
 
