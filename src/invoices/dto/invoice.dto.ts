@@ -1,3 +1,4 @@
+import { OmitType } from '@nestjs/mapped-types';
 import { ContractorDto } from './contractor.dto';
 import { IncomeDto } from './income.dto';
 import { ExpensesDto } from './expenses.dto';
@@ -11,7 +12,6 @@ import {
   IncomeValidator,
   ExpensesValidator,
 } from '../helpers/invoiceValidation.decorator';
-import { OmitType } from '@nestjs/mapped-types';
 
 export class InvoiceDto {
   @IdValidator() id: string;
@@ -20,7 +20,7 @@ export class InvoiceDto {
   @RegistryValidator() registry: string;
   @DescriptionValidator() description: string;
   @ContractorValidator() contractor: ContractorDto;
-  @IncomeValidator() income: IncomeDto;
+  @IncomeValidator() income!: IncomeDto;
   @ExpensesValidator() expenses: ExpensesDto;
 }
 

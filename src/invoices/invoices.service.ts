@@ -9,16 +9,16 @@ const firstItem: InvoiceDto = {
   dateOfEvent: '2021-02-23',
   registry: 'abc1234678',
   description: 'kulalalal',
-  income: {
-    soldGoods: 232323,
-    totalGoods: 3232323,
-  },
   contractor: {
     name: 'Kamil',
     surname: 'Kowalczuk',
     companyName: 'KKF Company',
     nip: '54333222343',
     address: 'Pietkiewicza 4D/29',
+  },
+  income: {
+    soldGoods: 232323,
+    totalGoods: 3232323,
   },
   expenses: {
     other: 323,
@@ -28,7 +28,7 @@ const firstItem: InvoiceDto = {
 
 @Injectable()
 export class InvoicesService {
-  private readonly invoiceDtos: InvoiceDto[] = [firstItem];
+  private invoiceDtos: InvoiceDto[] = [firstItem];
 
   addInvoice(invoice: AddInvoiceDto): any {
     const newInvoiceRecord: InvoiceDto = { id: nanoid(), ...invoice };
@@ -63,5 +63,10 @@ export class InvoicesService {
 
   removeSpecificInvoice(invoiceID: string) {
     const invoices = this.invoiceDtos.filter(({ id }) => invoiceID !== id);
+    if (isEmpty(invoices)) {
+      this.invoiceDtos = invoices;
+      return true;
+    }
+    return false;
   }
 }

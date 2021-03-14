@@ -11,6 +11,7 @@ async function bootstrap() {
       always: true,
       stopAtFirstError: true,
       validateCustomDecorators: true,
+      skipMissingProperties: false,
     }),
   );
   await app.listen(3000);

@@ -3,8 +3,8 @@ import {
   IsInt,
   Min,
   IsDefined,
-  IsDate,
   IsString,
+  IsNotEmpty,
   Length,
   ValidateNested,
 } from 'class-validator';
@@ -31,6 +31,7 @@ export function IdValidator() {
 export function PositionValidator() {
   return applyDecorators(
     IsDefined({ message: 'Position of invoice is required!' }),
+    IsNotEmpty(),
     IsInt({ message: 'Position of invoice must be a number' }),
     Min(1, { message: 'Position of invoice must be greater than 0' }),
   );
@@ -66,9 +67,9 @@ export function DescriptionValidator() {
 
 export function ContractorValidator() {
   return applyDecorators(
+    Type(() => ContractorDto),
     IsDefined({ message: 'Contractor fields are required!' }),
     ValidateNested({ each: true, message: 'Contractor fields are required!' }),
-    Type(() => ContractorDto),
   );
 }
 
@@ -138,6 +139,7 @@ export function ContractorTaxIdValidator() {
 export function ContractorAddressValidator() {
   // poprawić
   return applyDecorators(
+    IsNotEmpty(),
     IsDefined({ message: 'Contractor address is required!' }),
     IsString({ message: 'Contractor address must be a string!' }),
     Length(10, 50, {

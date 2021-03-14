@@ -43,7 +43,8 @@ export class InvoicesController {
   @Delete('/:id')
   removeInvoice(@Res() res: Response, @Param() param) {
     const { id } = param;
-    return res.send(`Record with ${id} id has been deleted`);
+    const deletedInvoice = this.invoicesService.removeSpecificInvoice(id);
+    return deletedInvoice ? res.status(204).json({}) : res.status(409).json({});
   }
 
   /* DELETE SPECIFIC BY DATE INVOICE */
@@ -88,7 +89,6 @@ export class InvoicesController {
     @Param() param: Pick<InvoiceDto, 'id'>,
   ) {
     const { id } = param;
-    console.log(nanoid());
     return res.send(
       `Record with ${id} id has been updated by: ${JSON.stringify(body)}`,
     );
