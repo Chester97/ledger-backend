@@ -1,4 +1,4 @@
-import { OmitType } from '@nestjs/mapped-types';
+import { OmitType, PickType, PartialType } from '@nestjs/mapped-types';
 import { ContractorDto } from './contractor.dto';
 import { IncomeDto } from './income.dto';
 import { ExpensesDto } from './expenses.dto';
@@ -25,3 +25,5 @@ export class InvoiceDto {
 }
 
 export class AddInvoiceDto extends OmitType(InvoiceDto, ['id'] as const) {}
+export class IdInvoiceDto extends PickType(InvoiceDto, ['id'] as const) {}
+export class UpdateInvoiceDto extends PartialType(InvoiceDto) {}
