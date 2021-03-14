@@ -1,34 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { AddInvoiceDto, InvoiceDto } from './dto/invoice.dto';
+import {
+  AddInvoiceDto,
+  IdInvoiceDto,
+  InvoiceDto,
+  UpdateInvoiceDto,
+} from './dto/invoice.dto';
+import { INVOICES_DATA } from './tests/invoicesData.mock';
 import { nanoid } from 'nanoid';
 import { isEmpty } from 'rambda';
 
-const firstItem: InvoiceDto = {
-  id: 'dek66dKCUdfhJR5LfqZZS',
-  position: 5,
-  dateOfEvent: '2021-02-23',
-  registry: 'abc1234678',
-  description: 'kulalalal',
-  contractor: {
-    name: 'Kamil',
-    surname: 'Kowalczuk',
-    companyName: 'KKF Company',
-    nip: '54333222343',
-    address: 'Pietkiewicza 4D/29',
-  },
-  income: {
-    soldGoods: 232323,
-    totalGoods: 3232323,
-  },
-  expenses: {
-    other: 323,
-    total: 3232,
-  },
-};
-
 @Injectable()
 export class InvoicesService {
-  private invoiceDtos: InvoiceDto[] = [firstItem];
+  private invoiceDtos: InvoiceDto[] = INVOICES_DATA;
 
   addInvoice(invoice: AddInvoiceDto): any {
     const newInvoiceRecord: InvoiceDto = { id: nanoid(), ...invoice };
@@ -62,11 +45,18 @@ export class InvoicesService {
   }
 
   removeSpecificInvoice(invoiceID: string) {
+    if (isEmpty(this.invoiceDtos)) return false;
     const invoices = this.invoiceDtos.filter(({ id }) => invoiceID !== id);
-    if (isEmpty(invoices)) {
-      this.invoiceDtos = invoices;
-      return true;
-    }
-    return false;
+    this.invoiceDtos = invoices;
+    return true;
+  }
+
+  updateSpecificInvoice(invoice: UpdateInvoiceDto, idObject: IdInvoiceDto) {
+    const { id } = idObject;
+    const updatedDB = this.invoiceDtos.map((item) =>
+      item.id === id ? { ...item, ...invoice } : item,
+    );
+    this.invoiceDtos = updatedDB;
+    return true;
   }
 }

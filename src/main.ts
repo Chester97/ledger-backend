@@ -12,6 +12,9 @@ async function bootstrap() {
       stopAtFirstError: true,
       validateCustomDecorators: true,
       skipMissingProperties: false,
+      whitelist: true,
+      forbidUnknownValues: true,
+      forbidNonWhitelisted: true,
     }),
   );
   await app.listen(3000);

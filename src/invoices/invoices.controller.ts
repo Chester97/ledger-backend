@@ -7,17 +7,16 @@ import {
   Res,
   Body,
   Param,
-  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { nanoid } from 'nanoid';
-import { BodyRequestGuard } from '../guards/body.guard';
 import { InvoicesService } from './invoices.service';
-import { AddInvoiceDto, InvoiceDto } from './dto/invoice.dto';
-
-type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
+import {
+  AddInvoiceDto,
+  IdInvoiceDto,
+  UpdateInvoiceDto,
+} from './dto/invoice.dto';
 
 @Controller('invoices')
 export class InvoicesController {
@@ -76,7 +75,15 @@ export class InvoicesController {
 
   /* FILTER INVOICES BY PARAMS IN BODY */
   @Post('/search')
-  @UseGuards(BodyRequestGuard)
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      disableErrorMessages: false,
+      always: true,
+      stopAtFirstError: true,
+      validateCustomDecorators: true,
+    }),
+  )
   searchBy(@Res() res: Response, @Body() body) {
     return res.send(`You are filtering data by: ${JSON.stringify(body)}`);
   }
@@ -85,12 +92,13 @@ export class InvoicesController {
   @Patch('/update/:id')
   updateInvoice(
     @Res() res: Response,
-    @Body() body: AtLeast<InvoiceDto, 'id'>,
-    @Param() param: Pick<InvoiceDto, 'id'>,
+    @Body() body: UpdateInvoiceDto,
+    @Param() param: IdInvoiceDto,
   ) {
     const { id } = param;
-    return res.send(
-      `Record with ${id} id has been updated by: ${JSON.stringify(body)}`,
-    );
+    const result = this.invoicesService.updateSpecificInvoice(body, param);
+    return result
+      ? res.send({ message: 'Record Updated' }).status(200)
+      : res.send({ message: 'Cannot update' }).status(400);
   }
 }
