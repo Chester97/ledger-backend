@@ -24,4 +24,4 @@ export class InvoiceDto {
   @ExpensesValidator() expenses: ExpensesDto;
 }
 
-export class OmitIdInvoiceDto extends OmitType(InvoiceDto, ['id'] as const) {}
+export class AddInvoiceDto extends OmitType(InvoiceDto, ['id'] as const) {}

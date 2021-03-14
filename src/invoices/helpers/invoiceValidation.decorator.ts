@@ -1,47 +1,26 @@
 import { applyDecorators } from '@nestjs/common';
 import {
-  Validate,
   IsInt,
   Min,
   IsDefined,
-  IsNotEmpty,
-  IsNotEmptyObject,
-  IsDateString,
   IsString,
+  IsNotEmpty,
   Length,
   ValidateNested,
-  registerDecorator,
-  ValidationOptions,
-  ValidationArguments,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ContractorDto } from '../dto/contractor.dto';
-import { ExpensesDto } from '../dto/expenses.dto';
-import { IncomeDto } from '../dto/income.dto';
-import { IsOnlyDate } from './isOnlyDateValidator';
-import { isEmpty } from 'rambda';
-
-export function customNestedObject(validationOptions?: ValidationOptions) {
-  return (object: any, propertyName: string) => {
-    registerDecorator({
-      name: 'IsNestedObject',
-      target: object.constructor,
-      propertyName,
-      constraints: [],
-      options: validationOptions,
-      validator: {
-        validate(value: any, args: ValidationArguments) {
-          console.log(args);
-          if (isEmpty(value)) return false;
-          return true;
-        },
-      },
-    });
-  };
-}
+import {
+  IncomeNested,
+  IncomeProperties,
+} from './IncomeCustomValidator.decorator';
+import {
+  ExpensesNested,
+  ExpensesProperties,
+} from './ExpensesCustomValidator.decorator';
+import { IsOnlyDate } from './DateCustomValidator.decorator';
 
 export function IdValidator() {
-  console.log('wbijam ID');
   return applyDecorators(
     IsDefined({ message: 'ID of an inovice is required!' }),
     IsString({ message: 'ID must be a string!' }),
@@ -50,7 +29,6 @@ export function IdValidator() {
 }
 
 export function PositionValidator() {
-  console.log('wbijam');
   return applyDecorators(
     IsDefined({ message: 'Position of invoice is required!' }),
     IsNotEmpty(),
@@ -95,23 +73,21 @@ export function ContractorValidator() {
   );
 }
 
-// export function IncomeValidator() {
-//   return applyDecorators(
-//     IsDefined({ message: 'Income fields are required!' }),
-//     IsNotEmptyObject(),
-//     ValidateNested({ each: true, message: 'Income fields are required!' }),
-//     Type(() => IncomeDto),
-//   );
-// }
-
 export function IncomeValidator() {
-  return applyDecorators(IsDefined(), IsNotEmptyObject(), customNestedObject());
+  return applyDecorators(
+    IsDefined({ message: 'Income fields are required!' }),
+    IncomeNested({ message: 'Income fields are empty!' }),
+    IncomeProperties({ message: 'Missing fields or wrong data in Income!' }),
+  );
 }
 
 export function ExpensesValidator() {
   return applyDecorators(
     IsDefined({ message: 'Expenses fields are required!' }),
-    ValidateNested({ each: true, message: 'Expenses fields are required!' }),
+    ExpensesNested({ message: 'Expenses fields are empty!' }),
+    ExpensesProperties({
+      message: 'Missing fields or wrong data in Expenses!',
+    }),
   );
 }
 

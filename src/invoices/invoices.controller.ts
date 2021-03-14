@@ -15,10 +15,9 @@ import { Response } from 'express';
 import { nanoid } from 'nanoid';
 import { BodyRequestGuard } from '../guards/body.guard';
 import { InvoicesService } from './invoices.service';
-import { InvoiceDto, OmitIdInvoiceDto } from './dto/invoice.dto';
+import { AddInvoiceDto, InvoiceDto } from './dto/invoice.dto';
 
 type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>;
-type XYZ = Exclude<InvoiceDto, 'id'>;
 
 @Controller('invoices')
 export class InvoicesController {
@@ -57,25 +56,22 @@ export class InvoicesController {
 
   /* ADD ONE OR MANY INVOICES */
   @Post('/add')
-  addInvoice(
-    @Res() res: Response,
-    @Body(
-      new ValidationPipe({
-        disableErrorMessages: false,
-        always: true,
-        stopAtFirstError: true,
-        validateCustomDecorators: true,
-        skipMissingProperties: false,
-        transform: true,
-        transformOptions: {
-          enableImplicitConversion: true,
-        },
-      }),
-    )
-    body: OmitIdInvoiceDto,
-  ) {
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      disableErrorMessages: false,
+      always: true,
+      stopAtFirstError: true,
+      validateCustomDecorators: true,
+    }),
+  )
+  addInvoice(@Res() res: Response, @Body() body: AddInvoiceDto) {
     const invoice = this.invoicesService.addInvoice(body);
-    return res.json(invoice);
+    return invoice
+      ? res.json(invoice)
+      : res
+          .json({ message: 'Invoice already exist', status: 'failed' })
+          .status(404);
   }
 
   /* FILTER INVOICES BY PARAMS IN BODY */
@@ -93,7 +89,6 @@ export class InvoicesController {
     @Param() param: Pick<InvoiceDto, 'id'>,
   ) {
     const { id } = param;
-    console.log(nanoid());
     return res.send(
       `Record with ${id} id has been updated by: ${JSON.stringify(body)}`,
     );

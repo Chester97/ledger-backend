@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InvoiceDto } from './dto/invoice.dto';
-import { errorResponseObject } from './helpers/errorResponseObject';
+import { AddInvoiceDto, InvoiceDto } from './dto/invoice.dto';
 import { nanoid } from 'nanoid';
 import { isEmpty } from 'rambda';
 
@@ -31,13 +30,12 @@ const firstItem: InvoiceDto = {
 export class InvoicesService {
   private invoiceDtos: InvoiceDto[] = [firstItem];
 
-  addInvoice(invoice: Omit<InvoiceDto, 'id'>): any {
+  addInvoice(invoice: AddInvoiceDto): any {
     const newInvoiceRecord: InvoiceDto = { id: nanoid(), ...invoice };
     const { registry } = newInvoiceRecord;
     if (this.isInvoiceExistByRegistry(registry)) {
-      return errorResponseObject('This invoice is already exist in DB!');
+      return false;
     }
-    console.log('DODAJE FAKTURE');
     this.invoiceDtos.push(newInvoiceRecord);
     return newInvoiceRecord;
   }
