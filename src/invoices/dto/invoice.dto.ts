@@ -1,7 +1,7 @@
 import { OmitType, PickType, PartialType } from '@nestjs/mapped-types';
-import { ContractorDto } from './contractor.dto';
-import { IncomeDto } from './income.dto';
-import { ExpensesDto } from './expenses.dto';
+import { ContractorDto, ContractorSchema } from './contractor.dto';
+import { IncomeDto, IncomeSchema } from './income.dto';
+import { ExpensesDto, ExpensesSchema } from './expenses.dto';
 import {
   IdValidator,
   PositionValidator,
@@ -12,18 +12,28 @@ import {
   IncomeValidator,
   ExpensesValidator,
 } from '../helpers/invoiceValidation.decorator';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
+export type InvoiceDocumnet = InvoiceDto & Document;
+
+@Schema()
 export class InvoiceDto {
-  @IdValidator() id: string;
-  @PositionValidator() position: number;
-  @DateOfEventValidator() dateOfEvent: string;
-  @RegistryValidator() registry: string;
-  @DescriptionValidator() description: string;
-  @ContractorValidator() contractor: ContractorDto;
-  @IncomeValidator() income!: IncomeDto;
-  @ExpensesValidator() expenses: ExpensesDto;
+  @Prop() @IdValidator() id: string;
+  @Prop() @PositionValidator() position: number;
+  @Prop() @DateOfEventValidator() dateOfEvent: string;
+  @Prop() @RegistryValidator() registry: string;
+  @Prop() @DescriptionValidator() description: string;
+  @Prop() @ContractorValidator() contractor: ContractorDto;
+  @Prop() @IncomeValidator() income!: IncomeDto;
+  @Prop() @ExpensesValidator() expenses: ExpensesDto;
 }
 
-export class AddInvoiceDto extends OmitType(InvoiceDto, ['id'] as const) {}
+export const InvoiceSchema = SchemaFactory.createForClass(InvoiceDto);
+
+export class AddInvoiceDto extends OmitType(InvoiceDto, [
+  'id',
+  'position',
+] as const) {}
 export class IdInvoiceDto extends PickType(InvoiceDto, ['id'] as const) {}
 export class UpdateInvoiceDto extends PartialType(InvoiceDto) {}

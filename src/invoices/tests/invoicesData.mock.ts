@@ -3,7 +3,7 @@ import { InvoiceDto } from '../dto/invoice.dto';
 export const INVOICES_DATA: Array<InvoiceDto> = [
   {
     id: 'dek66dKCUdfhJR5LfqZZS',
-    position: 2,
+    position: 1,
     dateOfEvent: '2021-02-23',
     registry: 'abc1234678',
     description: 'kulalalal',
@@ -25,7 +25,7 @@ export const INVOICES_DATA: Array<InvoiceDto> = [
   },
   {
     id: 'Yif_OYWZdbr6IqLmtQZnb',
-    position: 3,
+    position: 2,
     dateOfEvent: '2021-10-13',
     registry: 'def12345',
     description: 'kulalalal',
@@ -47,7 +47,7 @@ export const INVOICES_DATA: Array<InvoiceDto> = [
   },
   {
     id: 'qYpVmV8ruZ3NRvgeGZL3B',
-    position: 4,
+    position: 3,
     dateOfEvent: '2021-12-20',
     registry: 'ghi12345',
     description: 'tramamma',
