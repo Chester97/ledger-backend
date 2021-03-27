@@ -54,8 +54,8 @@ export class InvoicesController {
 
   /* ADD ONE OR MANY INVOICES */
   @Post('/add')
-  addInvoice(@Res() res: Response, @Body() body: AddInvoiceDto) {
-    const invoice = this.invoicesService.addInvoice(body);
+  async addInvoice(@Res() res: Response, @Body() body: AddInvoiceDto) {
+    const invoice = await this.invoicesService.addInvoice(body);
     return invoice
       ? res.json(invoice)
       : res
