@@ -7,8 +7,6 @@ import {
   Res,
   Body,
   Param,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { InvoicesService } from './invoices.service';
@@ -17,6 +15,7 @@ import {
   IdInvoiceDto,
   UpdateInvoiceDto,
 } from './dto/invoice.dto';
+import { isEmpty } from 'rambda';
 
 @Controller('invoices')
 export class InvoicesController {
@@ -24,25 +23,25 @@ export class InvoicesController {
 
   /* GET ALL INVOICES */
   @Get()
-  invoices(@Res() res: Response): Response {
-    // Here I should return all invoices with summary which is sum of my company collected invoices and sold invoices
-    const invoices = this.invoicesService.getAllInvoices();
+  async invoices(@Res() res: Response): Promise<Response> {
+    const invoices = await this.invoicesService.getAllInvoices();
     return res.json(invoices);
   }
 
   /* GET SPECIFIC INVOICE */
   @Get('/:id')
-  invoice(@Res() res: Response, @Param() param): Response {
+  async invoice(@Res() res: Response, @Param() param): Promise<Response> {
     const { id } = param;
-    const invoice = this.invoicesService.getSpecificInvoice(id);
+    const invoice = await this.invoicesService.getSpecificInvoice(id);
     return res.json(invoice);
   }
 
   /* DELETE SPECIFIC BY ID(RECORD ID NOT COMPANY ID) INVOICE */
   @Delete('/:id')
-  removeInvoice(@Res() res: Response, @Param() param) {
+  async removeInvoice(@Res() res: Response, @Param() param) {
     const { id } = param;
-    const deletedInvoice = this.invoicesService.removeSpecificInvoice(id);
+    const deletedInvoice = await this.invoicesService.removeSpecificInvoice(id);
+    console.log(deletedInvoice);
     return deletedInvoice ? res.status(204).json({}) : res.status(409).json({});
   }
 
@@ -55,15 +54,6 @@ export class InvoicesController {
 
   /* ADD ONE OR MANY INVOICES */
   @Post('/add')
-  @UsePipes(
-    new ValidationPipe({
-      transform: true,
-      disableErrorMessages: false,
-      always: true,
-      stopAtFirstError: true,
-      validateCustomDecorators: true,
-    }),
-  )
   addInvoice(@Res() res: Response, @Body() body: AddInvoiceDto) {
     const invoice = this.invoicesService.addInvoice(body);
     return invoice
@@ -75,28 +65,23 @@ export class InvoicesController {
 
   /* FILTER INVOICES BY PARAMS IN BODY */
   @Post('/search')
-  @UsePipes(
-    new ValidationPipe({
-      transform: true,
-      disableErrorMessages: false,
-      always: true,
-      stopAtFirstError: true,
-      validateCustomDecorators: true,
-    }),
-  )
   searchBy(@Res() res: Response, @Body() body) {
     return res.send(`You are filtering data by: ${JSON.stringify(body)}`);
   }
 
   /* UPDATE SPECIFIC INVOICE */
   @Patch('/update/:id')
-  updateInvoice(
+  async updateInvoice(
     @Res() res: Response,
     @Body() body: UpdateInvoiceDto,
     @Param() param: IdInvoiceDto,
   ) {
-    const { id } = param;
-    const result = this.invoicesService.updateSpecificInvoice(body, param);
+    if (isEmpty(body))
+      return res.send({ message: 'Body should not  be empty' }).status(400);
+    const result = await this.invoicesService.updateSpecificInvoice(
+      body,
+      param,
+    );
     return result
       ? res.send({ message: 'Record Updated' }).status(200)
       : res.send({ message: 'Cannot update' }).status(400);

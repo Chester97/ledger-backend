@@ -2,24 +2,41 @@ import { Injectable } from '@nestjs/common';
 import {
   AddInvoiceDto,
   IdInvoiceDto,
+  InvoiceDocumnet,
   InvoiceDto,
   UpdateInvoiceDto,
 } from './dto/invoice.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { INVOICES_DATA } from './tests/invoicesData.mock';
 import { nanoid } from 'nanoid';
-import { isEmpty } from 'rambda';
+import { all, isEmpty, isNil } from 'rambda';
 
 @Injectable()
 export class InvoicesService {
+  constructor(
+    @InjectModel('Invoice')
+    private readonly invoiceModel: Model<InvoiceDocumnet>,
+  ) {}
   private invoiceDtos: InvoiceDto[] = INVOICES_DATA;
+  private positionInvoice = 3;
 
   addInvoice(invoice: AddInvoiceDto): any {
-    const newInvoiceRecord: InvoiceDto = { id: nanoid(), ...invoice };
+    const newInvoiceRecord: InvoiceDto = {
+      id: nanoid(),
+      position: ++this.positionInvoice,
+      ...invoice,
+    };
     const { registry } = newInvoiceRecord;
     if (this.isInvoiceExistByRegistry(registry)) {
       return false;
     }
+    // do wywalenia
     this.invoiceDtos.push(newInvoiceRecord);
+    const createdInvoiceRecord = new this.invoiceModel(newInvoiceRecord);
+
+    // addInvoice będzie zwracał Promisa
+    createdInvoiceRecord.save();
     return newInvoiceRecord;
   }
 
@@ -31,32 +48,38 @@ export class InvoicesService {
     return !isEmpty(isInvoiceExist);
   }
 
-  getSpecificInvoice(invoiceID: string) {
-    const currentInvoice = this.invoiceDtos.filter(
-      ({ id }) => id === invoiceID,
+  async getSpecificInvoice(invoiceID: string) {
+    const specificInvoice = await this.invoiceModel.findOne(
+      { id: invoiceID },
+      '-_id -__v',
     );
-    return isEmpty(currentInvoice)
-      ? { message: 'Cannot find invoice' }
-      : currentInvoice[0];
+    return isNil(specificInvoice)
+      ? { message: 'Invoice does not exist' }
+      : specificInvoice;
   }
 
-  getAllInvoices() {
-    return isEmpty(this.invoiceDtos) ? [] : this.invoiceDtos;
+  async getAllInvoices() {
+    const allInvoices = await this.invoiceModel.find({}, '-_id -__v');
+    return isEmpty(this.invoiceDtos) || isNil(allInvoices) ? [] : allInvoices;
   }
 
-  removeSpecificInvoice(invoiceID: string) {
-    if (isEmpty(this.invoiceDtos)) return false;
-    const invoices = this.invoiceDtos.filter(({ id }) => invoiceID !== id);
-    this.invoiceDtos = invoices;
-    return true;
+  async removeSpecificInvoice(invoiceID: string) {
+    const removedInvoice = await this.invoiceModel.deleteOne({ id: invoiceID });
+    const { deletedCount } = removedInvoice;
+
+    return !!deletedCount;
   }
 
-  updateSpecificInvoice(invoice: UpdateInvoiceDto, idObject: IdInvoiceDto) {
+  async updateSpecificInvoice(
+    invoice: UpdateInvoiceDto,
+    idObject: IdInvoiceDto,
+  ) {
     const { id } = idObject;
-    const updatedDB = this.invoiceDtos.map((item) =>
-      item.id === id ? { ...item, ...invoice } : item,
+    const updatedInvoice = await this.invoiceModel.findOneAndUpdate(
+      { id },
+      invoice,
     );
-    this.invoiceDtos = updatedDB;
-    return true;
+
+    return isNil(updatedInvoice) ? false : true;
   }
 }
