@@ -15,8 +15,6 @@ import {
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type InvoiceDocumnet = InvoiceDto & Document;
-
 @Schema()
 export class InvoiceDto {
   @Prop() @IdValidator() id: string;
@@ -28,6 +26,8 @@ export class InvoiceDto {
   @Prop() @IncomeValidator() income!: IncomeDto;
   @Prop() @ExpensesValidator() expenses: ExpensesDto;
 }
+
+export type InvoiceDocument = InvoiceDto & Document;
 
 export const InvoiceSchema = SchemaFactory.createForClass(InvoiceDto);
 

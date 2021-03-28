@@ -164,6 +164,13 @@ export function IncomeTotalValidator() {
   );
 }
 
+export function IncomeSumValidator() {
+  return applyDecorators(
+    IsDefined({ message: 'Income sum goods is valid!' }),
+    IsInt({ message: 'Income sum must be an numbers!' }),
+  );
+}
+
 /* ---EXPENSES_FIELDS--- */
 
 export function ExpenseOtherValidator() {
@@ -177,5 +184,12 @@ export function ExpenseTotalValidator() {
   return applyDecorators(
     IsDefined({ message: 'Expense total is valid!' }),
     IsInt({ message: 'Expense total must be an numbers!' }),
+  );
+}
+
+export function ExpenseSumValidator() {
+  return applyDecorators(
+    IsDefined({ message: 'Expense sum is valid!' }),
+    IsInt({ message: 'Expense sum must be an numbers!' }),
   );
 }

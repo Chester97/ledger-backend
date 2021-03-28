@@ -35,7 +35,8 @@ export function IncomeProperties(validationOptions?: ValidationOptions) {
         validate(value: any, args: ValidationArguments) {
           if (
             propIs(Number, 'soldGoods', value) &&
-            propIs(Number, 'totalGoods', value)
+            propIs(Number, 'totalGoods', value) &&
+            propIs(Number, 'sum', value)
           ) {
             return true;
           }

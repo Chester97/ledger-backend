@@ -35,7 +35,8 @@ export function ExpensesProperties(validationOptions?: ValidationOptions) {
         validate(value: any, args: ValidationArguments) {
           if (
             propIs(Number, 'other', value) &&
-            propIs(Number, 'total', value)
+            propIs(Number, 'total', value) &&
+            propIs(Number, 'sum', value)
           ) {
             return true;
           }
