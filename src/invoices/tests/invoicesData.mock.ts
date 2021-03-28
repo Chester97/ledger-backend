@@ -17,10 +17,12 @@ export const INVOICES_DATA: Array<InvoiceDto> = [
     income: {
       soldGoods: 232323,
       totalGoods: 3232323,
+      sum: 3232,
     },
     expenses: {
       other: 323,
       total: 3232,
+      sum: 322,
     },
   },
   {
@@ -39,10 +41,12 @@ export const INVOICES_DATA: Array<InvoiceDto> = [
     income: {
       soldGoods: 21212,
       totalGoods: 6767,
+      sum: 3232,
     },
     expenses: {
       other: 444,
       total: 65656,
+      sum: 3232,
     },
   },
   {
@@ -61,10 +65,12 @@ export const INVOICES_DATA: Array<InvoiceDto> = [
     income: {
       soldGoods: 9877,
       totalGoods: 90909,
+      sum: 323,
     },
     expenses: {
       other: 4545,
       total: 4545,
+      sum: 989,
     },
   },
 ];

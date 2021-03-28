@@ -11,6 +11,8 @@ import { Model } from 'mongoose';
 import { INVOICES_DATA } from './tests/invoicesData.mock';
 import { nanoid } from 'nanoid';
 import { isEmpty, isNil, omit } from 'rambda';
+import { ExpensesDto } from './dto/expenses.dto';
+import { IncomeDto } from './dto/income.dto';
 
 const obj = {
   _id: '605f40b0aa79090cc9da7fd1',
@@ -38,7 +40,6 @@ export class InvoicesService {
     private readonly invoiceModel: Model<InvoiceDocument>,
   ) {}
   private invoiceDtos: InvoiceDto[] = INVOICES_DATA;
-  private positionInvoice = 3;
   private readonly projectFields = '-_id -__v';
 
   async addInvoice(invoice: AddInvoiceDto): Promise<InvoiceDto | boolean> {
@@ -117,9 +118,42 @@ export class InvoicesService {
     const { position } = lastInvoice[0];
     return position + 1;
   }
-}
 
-// Tweet.findOne().sort({created_at: -1}).exec(function(err, post) { ... });
-// User.find({}).sort({_id: -1}).limit(1).then((products) => {
-//   console.log(products[0].voice)
-// })
+  async sumExpenses() {
+    const foo = await this.invoiceModel.aggregate([
+      { $match: {} },
+      {
+        $project: {
+          total: { $sum: { $add: ['$expenses.total', '$expenses.other'] } },
+        },
+      },
+    ]);
+  }
+
+  async allSumSummaryExpenses() {
+    const foo = await this.invoiceModel.aggregate([
+      { $match: {} },
+      {
+        $group: {
+          _id: null,
+          amount: { $sum: { $add: ['$expenses.total', '$expenses.other'] } },
+        },
+      },
+    ]);
+    return foo;
+  }
+
+  async sumIncome() {
+    const foo = await this.invoiceModel.aggregate([
+      { $match: {} },
+      {
+        $project: {
+          total: {
+            $sum: { $add: ['$income.soldGoods', '$income.totalGoods'] },
+          },
+        },
+      },
+    ]);
+    return foo;
+  }
+}

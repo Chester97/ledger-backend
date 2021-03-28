@@ -28,6 +28,14 @@ export class InvoicesController {
     return res.json(invoices);
   }
 
+  /* TEST_SUMMARY */
+  @Get('/test')
+  async summary(@Res() res: Response): Promise<any> {
+    const summary = await this.invoicesService.sumExpenses();
+    console.log(summary);
+    res.send('Jest git').status(200);
+  }
+
   /* GET SPECIFIC INVOICE */
   @Get('/:id')
   async invoice(@Res() res: Response, @Param() param): Promise<Response> {

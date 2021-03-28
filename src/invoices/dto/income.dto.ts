@@ -1,6 +1,7 @@
 import {
   IncomeSoldValidator,
   IncomeTotalValidator,
+  IncomeSumValidator,
 } from '../helpers/invoiceValidation.decorator';
 import { Schema } from 'mongoose';
 
@@ -12,4 +13,5 @@ export const IncomeSchema = new Schema({
 export class IncomeDto {
   @IncomeSoldValidator() soldGoods: number;
   @IncomeTotalValidator() totalGoods: number;
+  @IncomeSumValidator() sum: number;
 }
