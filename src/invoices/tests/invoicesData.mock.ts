@@ -65,12 +65,12 @@ export const INVOICES_DATA: Array<InvoiceDto> = [
     income: {
       soldGoods: 9877,
       totalGoods: 90909,
-      sum: 323,
+      sum: 3232,
     },
     expenses: {
       other: 4545,
       total: 4545,
-      sum: 989,
+      sum: 3232,
     },
   },
 ];

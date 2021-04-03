@@ -7,8 +7,8 @@ export class SummaryController {
   constructor(private readonly summaryService: SummaryService) {}
 
   @Get()
-  foo(@Res() res: Response, @Param() param) {
-    this.summaryService.foo();
+  async foo(@Res() res: Response, @Param() param) {
+    await this.summaryService.sumExpensesAndIncomes();
     res.send('Siemka').status(200);
   }
 }
