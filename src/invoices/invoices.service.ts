@@ -7,10 +7,10 @@ import {
   UpdateInvoiceDto,
 } from './dto/invoice.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { INVOICES_DATA } from './tests/invoicesData.mock';
 import { nanoid } from 'nanoid';
-import { isEmpty, isNil, omit } from 'rambda';
+import { isEmpty, isNil } from 'rambda';
 import { ExpensesDto } from './dto/expenses.dto';
 import { IncomeDto } from './dto/income.dto';
 
@@ -55,9 +55,32 @@ export class InvoicesService {
       ...invoice,
     };
     const createdInvoiceRecord = new this.invoiceModel(newInvoiceRecord);
+    console.clear();
     const addedInvoice = await createdInvoiceRecord.save();
+    await this.foo(addedInvoice._id);
+    console.log('ADDED: ', addedInvoice);
 
     return addedInvoice ? newInvoiceRecord : false;
+  }
+
+  async foo(invoiceId: ObjectId) {
+    const expensesSum = await this.invoiceModel.aggregate([
+      { $match: { _id: invoiceId } },
+      {
+        $project: {
+          $set: {
+            totalHomework: {
+              $sum: { $add: ['$expenses.total', '$expenses.other'] },
+            },
+            totalQuiz: {
+              $sum: { $add: ['$income.soldGoods', '$income.totalGoods'] },
+            },
+          },
+        },
+      },
+    ]);
+
+    return expensesSum;
   }
 
   async isInvoiceExistByRegistry(registryNumber: string): Promise<boolean> {
@@ -117,43 +140,5 @@ export class InvoicesService {
     if (isEmpty(lastInvoice)) return 0;
     const { position } = lastInvoice[0];
     return position + 1;
-  }
-
-  async sumExpenses() {
-    const foo = await this.invoiceModel.aggregate([
-      { $match: {} },
-      {
-        $project: {
-          total: { $sum: { $add: ['$expenses.total', '$expenses.other'] } },
-        },
-      },
-    ]);
-  }
-
-  async allSumSummaryExpenses() {
-    const foo = await this.invoiceModel.aggregate([
-      { $match: {} },
-      {
-        $group: {
-          _id: null,
-          amount: { $sum: { $add: ['$expenses.total', '$expenses.other'] } },
-        },
-      },
-    ]);
-    return foo;
-  }
-
-  async sumIncome() {
-    const foo = await this.invoiceModel.aggregate([
-      { $match: {} },
-      {
-        $project: {
-          total: {
-            $sum: { $add: ['$income.soldGoods', '$income.totalGoods'] },
-          },
-        },
-      },
-    ]);
-    return foo;
   }
 }

@@ -3,6 +3,7 @@ import {
   ExpenseTotalValidator,
   ExpenseSumValidator,
 } from '../helpers/invoiceValidation.decorator';
+import { OmitType } from '@nestjs/mapped-types';
 import { Schema } from 'mongoose';
 
 export const ExpensesSchema = new Schema({
@@ -13,5 +14,7 @@ export const ExpensesSchema = new Schema({
 export class ExpensesDto {
   @ExpenseOtherValidator() other: number;
   @ExpenseTotalValidator() total: number;
-  @ExpenseSumValidator() sum: number;
+  @ExpenseSumValidator() sum?: number;
 }
+
+export class AddExpensesDto extends OmitType(ExpensesDto, ['sum'] as const) {}
