@@ -10,7 +10,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { INVOICES_DATA } from './tests/invoicesData.mock';
 import { nanoid } from 'nanoid';
-import { isEmpty, isNil } from 'rambda';
+import { isEmpty, isNil, omit } from 'rambda';
 import { ExpensesDto } from './dto/expenses.dto';
 import { IncomeDto } from './dto/income.dto';
 
@@ -55,32 +55,27 @@ export class InvoicesService {
       ...invoice,
     };
     const createdInvoiceRecord = new this.invoiceModel(newInvoiceRecord);
-    console.clear();
     const addedInvoice = await createdInvoiceRecord.save();
-    await this.foo(addedInvoice._id);
-    console.log('ADDED: ', addedInvoice);
+    const finalInvoice = await this.calculateSum(addedInvoice._id);
+    const finalInvoiceOmittedFields =
+      finalInvoice && omit(['__v', '_id'], finalInvoice);
+    console.log(finalInvoiceOmittedFields);
 
-    return addedInvoice ? newInvoiceRecord : false;
+    return finalInvoice ? addedInvoice : false;
   }
 
-  async foo(invoiceId: ObjectId) {
-    const expensesSum = await this.invoiceModel.aggregate([
-      { $match: { _id: invoiceId } },
+  async calculateSum(invoiceId: ObjectId): Promise<InvoiceDto | null> {
+    const finalInvoice = await this.invoiceModel.aggregate([
       {
-        $project: {
-          $set: {
-            totalHomework: {
-              $sum: { $add: ['$expenses.total', '$expenses.other'] },
-            },
-            totalQuiz: {
-              $sum: { $add: ['$income.soldGoods', '$income.totalGoods'] },
-            },
-          },
+        $addFields: {
+          'income.sum': { $add: ['$income.soldGoods', '$income.totalGoods'] },
+          'expenses.sum': { $add: ['$expenses.total', '$expenses.other'] },
         },
       },
+      { $out: 'invoices' },
     ]);
 
-    return expensesSum;
+    return !isEmpty(finalInvoice) ? finalInvoice[0] : null;
   }
 
   async isInvoiceExistByRegistry(registryNumber: string): Promise<boolean> {
